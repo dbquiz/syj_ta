@@ -1,12 +1,13 @@
 from st_thestrat import TheStrat
 from st_zindex import ZIndex
-
+from st_cci_bo import CCIBO
 #===========================================
 
 class StrategyFactory:
     _strategies = [
         (str(TheStrat()), TheStrat()),
         (str(ZIndex()), ZIndex()),
+        (str(CCIBO()), CCIBO()),
     ]
 
     @classmethod
