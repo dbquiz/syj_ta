@@ -3,6 +3,7 @@ import pandas as pd
 
 import time
 from functools import wraps
+from data_manager import DataManager
 from setup_helper import TradeParams
 
 #===========================================
@@ -27,9 +28,14 @@ class BaseStrategy(ABC):
             cls._instances[cls] = super(BaseStrategy, cls).__new__(cls)
         return cls._instances[cls]
 
+    def __init__(self, *args, **kwargs):
+        # Only initialize once per singleton instance
+        if not hasattr(self, 'dm'):
+            self.dm = kwargs.get('dm', DataManager())
+
     @timeit
     @abstractmethod
-    def process_data(self, basedata: list):
+    def process_data(self):
         print("impliment override")
 
     @timeit
@@ -50,4 +56,12 @@ class BaseStrategy(ABC):
     def __str__(self):
         return self.__class__.__name__
 
+    @timeit
+    def fetch_data_collection(self):
+        """
+        Fetches the data collection for the strategy.
+        """
+        
+        collection = self.dm.get_weekly_data()
+        return collection 
 #===========================================

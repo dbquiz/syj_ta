@@ -16,7 +16,8 @@ class ZIndex(BaseStrategy):
         self.ema_span = 20
         self.z_threshold = 2
 
-    def process_data(self, basedata:list):
+    def process_data(self):
+        basedata = self.fetch_data_collection()
         with PdfPages(f'reports/SP500_Weekly_ZIndex_buy_setups_{utility.get_date_mmddyyyy()}.pdf') as buy_pdf, \
              PdfPages(f'reports/SP500_Weekly_ZIndex_sell_setups_{utility.get_date_mmddyyyy()}.pdf') as sell_pdf:
             for ticker, df in basedata:

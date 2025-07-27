@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import yfinance as yf
 
+#=============================================
 
 class DataDownloader:
     """
@@ -24,6 +25,8 @@ class DataDownloader:
         """
         self.url = url or self.WIKIPEDIA_URL
         self.headers = headers or self.DEFAULT_HEADERS
+
+    #=============================================
 
     def get_ticker_list(self, filepath=None):
         """
@@ -54,7 +57,9 @@ class DataDownloader:
         self._save_tickers_to_json(tickers, os.path.basename(filepath))
         return tickers
 
-    def download_weekly_data(self, ticker):
+    #=============================================
+
+    def download_weekly_data(self, ticker, span = '2y'):
         """
         Downloads weekly historical OHLC data for the last 2 years.
 
@@ -66,7 +71,9 @@ class DataDownloader:
         Returns:
             pd.DataFrame: A DataFrame containing the OHLC data.
         """
-        return self.download_historic_data(ticker, span="2y", interval="1wk")
+        return self.download_historic_data(ticker, span=span, interval="1wk")
+
+    #=============================================
 
     def download_daily_data(self, ticker):
         """
@@ -82,6 +89,8 @@ class DataDownloader:
         """
         return self.download_historic_data(ticker, span="1y", interval="1d")
 
+    #=============================================
+    
     def download_historic_data(self, ticker, span="1y", interval="1d"):
         """
         Downloads historical OHLC data for a given ticker using yfinance.
@@ -113,6 +122,75 @@ class DataDownloader:
             print(f"An error occurred while downloading data for {ticker}: {e}")
             return pd.DataFrame()  # Return empty DataFrame on error
 
+    #=============================================
+    
+    def get_yearly_high(self, ticker, back_year):
+        """
+        Fetches the yearly high price for a given ticker and year.
+
+        Args:
+            back_year (tuple): (ticker, year) where year is int or str (e.g., 2022).
+
+        Returns:
+            float or None: The highest price in that year, or None if not found.
+        """
+        year    = int(back_year)
+        start   = f"{year}-01-01"
+        end     = f"{year+1}-01-01"
+        try:
+            df = yf.download(ticker, start=start, end=end, interval="1d", progress=False, auto_adjust=True)
+            df = self._flatten_yfinance_columns(df)
+            if df.empty or 'High' not in df.columns:
+                print(f"No data found for {ticker} in {year}.")
+                return None
+            return df['High'].max()
+        except Exception as e:
+            print(f"Error fetching yearly high for {ticker} in {year}: {e}")
+            return None
+
+    #=============================================
+    
+    def get_daily_close_on_date(self, ticker, date):
+        """
+        Gets the closing price of a ticker on a specific date without using download_daily_data.
+
+        Args:
+            ticker (str): The stock ticker symbol.
+            date (str or datetime): The date in 'YYYY-MM-DD' format or as a datetime object.
+
+        Returns:
+            float or None: The closing price, or None if not found.
+        """
+        # Convert date to string in 'YYYY-MM-DD' format
+        if hasattr(date, 'strftime'):
+            date_obj = date
+            date_str = date.strftime('%Y-%m-%d')
+        else:
+            date_str = str(date)
+            date_obj = pd.to_datetime(date_str)
+
+        try:
+            # Download only the required date's data
+            df = yf.download(ticker, start=date_str, end=date_str, interval="1d", progress=False, auto_adjust=True)
+            if df.empty:
+                # yfinance's end is exclusive, so fetch next day and filter
+                next_day = date_obj + pd.Timedelta(days=1)
+                df = yf.download(ticker, start=date_str, end=next_day.strftime('%Y-%m-%d'), interval="1d", progress=False, auto_adjust=True)
+                if df.empty:
+                    print(f"No data found for ticker '{ticker}' on {date_str}.")
+                    return None
+            # Index is DatetimeIndex, get row matching date_str
+
+            df = self._flatten_yfinance_columns(df)
+            row = df.loc[df.index.strftime('%Y-%m-%d') == date_str]
+            #print(row)
+            if row.empty or 'Close' not in row.columns:
+                print(f"No close price found for {ticker} on {date_str}.")
+                return None
+            return row['Close'].values[0]  # Return the close price
+        except Exception as e:
+            print(f"An error occurred while fetching close price for {ticker} on {date_str}: {e}")
+            return None
 
     #===========================================
     # This is specific for yfinance dataframe output. the columns are multiindex - like {[Close, 'JNJ']}
@@ -123,6 +201,8 @@ class DataDownloader:
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = [col[0] for col in df.columns.values]
         return df
+    
+    #=============================================
     
     def _fetch_tickers(self):
         """
@@ -146,6 +226,8 @@ class DataDownloader:
         print(f"Found {len(tickers)} tickers.")
         return tickers
 
+    #=============================================
+    
     @staticmethod
     def _save_tickers_to_json(tickers, filename=None):
         """Saves a list of tickers to a JSON file."""
@@ -161,6 +243,8 @@ class DataDownloader:
         print(f"Successfully saved tickers to {filepath}")
         return filepath
 
+    #=============================================
+    
     @staticmethod
     def _load_tickers_from_json(filepath=None):
         """Loads a list of tickers from a JSON file."""
@@ -179,4 +263,6 @@ class DataDownloader:
         except json.JSONDecodeError:
             print(f"Error: Could not decode JSON from {filepath}.")
             return None
+
+#=============================================
 

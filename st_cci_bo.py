@@ -28,10 +28,10 @@ class CCIBO(BaseStrategy):
     
     #============================================
 
-    def process_data(self, basedata: list):
+    def process_data(self):
         # Implement the logic to process the data for CCI BO strategy
         print(self.__str__())
-
+        basedata = self.fetch_data_collection()
         with PdfPages(f'reports/SP500_Weekly_CCI_BO_buy_setups_{utility.get_date_mmddyyyy()}.pdf') as buy_pdf, \
              PdfPages(f'reports/SP500_Weekly_CCI_BO_sell_setups_{utility.get_date_mmddyyyy()}.pdf') as sell_pdf:
             for ticker, df in basedata:

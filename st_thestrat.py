@@ -17,7 +17,8 @@ class TheStrat(BaseStrategy):
     def __str__(self):
         return "TheStrat"
 
-    def process_data(self, basedata):
+    def process_data(self):
+        basedata = self.fetch_data_collection()
         with PdfPages(f'reports/SP500_Weekly_F2_buy_setups_{utility.get_date_mmddyyyy()}.pdf') as buy_pdf, \
              PdfPages(f'reports/SP500_Weekly_F2_sell_setups_{utility.get_date_mmddyyyy()}.pdf') as sell_pdf:
             for ticker, data in basedata:

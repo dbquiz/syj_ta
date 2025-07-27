@@ -1,6 +1,7 @@
 from st_thestrat import TheStrat
 from st_zindex import ZIndex
 from st_cci_bo import CCIBO
+from st_parabolic import Parabolic
 #===========================================
 
 class StrategyFactory:
@@ -8,6 +9,7 @@ class StrategyFactory:
         (str(TheStrat()), TheStrat()),
         (str(ZIndex()), ZIndex()),
         (str(CCIBO()), CCIBO()),
+        (str(Parabolic()), Parabolic()),
     ]
 
     @classmethod

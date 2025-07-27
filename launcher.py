@@ -37,9 +37,7 @@ class Context:
         Args:
             ticker_filepath (str): The path to the JSON file containing tickers.
         """
-        self.weeklydata = []
-        self.dailydata = []
-        self.dm = DataManager()
+        #self.dm = DataManager()
         self.strat_factory = StrategyFactory()
         SetupLogger.clear_sameday_setup_log()
 
@@ -65,17 +63,18 @@ if __name__ == "__main__":
 
     try:
         print("--- SYJ_TA Launcher ---")
-        """
-        strat = session.strat_factory.get_instance_by_description('ZIndex')
-        strat.process_data(session.dm.get_weekly_data())
+        strat = session.strat_factory.get_instance_by_description('parabolic')
+        strat.process_data()
         
         """
         strats_list = session.strat_factory.get_all_instances()
 
         for strat in strats_list:
             print(strat)
-            strat.process_data(session.dm.get_weekly_data())
+            strat.process_data()
             #break # remove this in final edition
+        """
+
     except Exception as ex:
         print(ex)
     

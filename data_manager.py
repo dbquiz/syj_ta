@@ -18,9 +18,9 @@ class DataManager:
         
     #===========================================
 
-    def get_weekly_data(self):
+    def get_weekly_data(self, span='2y'):
         if not self._weeklydata_:
-            self._prepare_weekly_data_()
+            self._prepare_weekly_data_(span)
 
         return self._weeklydata_
 
@@ -31,7 +31,24 @@ class DataManager:
         return self._weeklydata_
     
     #===========================================
-    
+    def get_close_on_date(self, back_date):
+        dd = DataDownloader()
+        close_data = []
+        for ticker in self._tickers_:
+            print(ticker)
+            close_data.append((ticker, dd.get_daily_close_on_date(ticker, back_date)))
+
+        return close_data
+
+    def get_yearly_high(self, back_year):
+        dd = DataDownloader()
+        high_data = []
+        for ticker in self._tickers_:
+            print(ticker)
+            high_data.append((ticker, dd.get_yearly_high(ticker, back_year)))
+
+        return high_data
+
     def _prepare_daily_data_(self):
         self._daily_data_ = self.load_daily_data_from_sqlite()
         if not self._daily_data_:
@@ -51,7 +68,7 @@ class DataManager:
 
     #===========================================
 
-    def _prepare_weekly_data_(self):
+    def _prepare_weekly_data_(self, span='2y'):
         self._weekly_data_ = self.load_weekly_data_from_sqlite()
         if not self._weekly_data_:
             print("populating weekly data")
@@ -59,7 +76,7 @@ class DataManager:
             dd = DataDownloader()
             print(len(self._tickers_))
             for ticker in self._tickers_:
-                df = dd.download_weekly_data(ticker)
+                df = dd.download_weekly_data(ticker, span=span)
                 if len(df) > 0:
                     wdata.append((ticker, df))
             
