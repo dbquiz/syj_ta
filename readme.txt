@@ -1,5 +1,5 @@
 1. use venv
-command - python venv venv
+command - python -m venv venv
 
 2. activate venv
 command - venv/Scripts/Activate
